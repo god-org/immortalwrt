@@ -1,0 +1,28 @@
+name: Merge
+
+on:
+  pull_request:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  TZ: Asia/Shanghai
+
+jobs:
+  merge:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Auto merge
+        uses: pascalgn/automerge-action@v0.16.4
+        env:
+          MERGE_LABELS: ""
+          MERGE_FILTER_AUTHOR: "dependabot[bot]"
+          UPDATE_LABELS: ""
