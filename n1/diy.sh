@@ -14,4 +14,5 @@ git_sparse_clone() {
 }
 
 # Add packages
+git clone --single-branch --depth=1 https://github.com/kongfl888/luci-app-adguardhome package/luci-app-adguardhome
 git clone --single-branch --depth=1 https://github.com/ophub/luci-app-amlogic package/luci-app-amlogic
