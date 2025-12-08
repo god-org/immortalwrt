@@ -1,0 +1,16 @@
+
+config AdGuardHome 'AdGuardHome'
+	option enabled '1'
+	option httpport '3000'
+	option redirect 'none'
+	option configpath '/etc/AdGuardHome.yaml'
+	option workdir '/usr/bin/AdGuardHome'
+	option logfile '/tmp/AdGuardHome.log'
+	option verbose '0'
+	option binpath '/usr/bin/AdGuardHome/AdGuardHome'
+	option waitonboot '1'
+	option tagname 'release'
+	list old_redirect 'none'
+	list old_port '5053'
+	list old_enabled '1'
+
