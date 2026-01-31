@@ -10,7 +10,4 @@ config AdGuardHome 'AdGuardHome'
 	option binpath '/usr/bin/AdGuardHome/AdGuardHome'
 	option waitonboot '1'
 	option tagname 'release'
-	list old_redirect 'none'
-	list old_port '5053'
-	list old_enabled '1'
 

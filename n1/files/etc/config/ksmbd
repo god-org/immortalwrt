@@ -4,12 +4,22 @@ config globals
 	option description 'Ksmbd on OpenWrt'
 
 config share
-	option name 'n1'
+	option name 'n1_home'
+	option path '/root'
+	option read_only 'no'
+	option guest_ok 'no'
+	option hide_dot_files 'no'
+	option create_mask '0644'
+	option dir_mask '0755'
+	option users 'root'
+
+config share
+	option name 'n1_share'
 	option path '/mnt/mmcblk2p4'
 	option read_only 'no'
 	option guest_ok 'no'
 	option hide_dot_files 'no'
 	option create_mask '0644'
 	option dir_mask '0755'
-	option force_root '1'
+	option users 'root'
 

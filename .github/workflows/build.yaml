@@ -24,10 +24,10 @@ jobs:
 
     steps:
       - name: checkout
-        uses: actions/checkout@main
+        uses: actions/checkout@v6
 
       - name: Free up space
-        uses: jlumbroso/free-disk-space@main
+        uses: BRAINSia/free-disk-space@v2
 
       - name: Initialize environment
         env:
@@ -79,7 +79,8 @@ jobs:
         run: |
           make -j$(nproc) || make -j1 || make -j1 V=s
           echo "compile_status=success" >> $GITHUB_ENV
-          echo "BUILD_TIME=$(date +"%Y年%m月%d日%H时%M分%S秒")" >> $GITHUB_ENV
+          echo "BUILD_TIME=$(date +"%Y年%m月%d日 %H时%M分%S秒")" >> $GITHUB_ENV
+          echo "RELEASE_TAG=$(date +"%Y.%m.%d-%H:%M:%S")" >> $GITHUB_ENV
 
       - name: Package armsr as openwrt
         if: ${{ env.compile_status == 'success' }}
@@ -99,22 +100,17 @@ jobs:
         if: ${{ env.PACKAGED_STATUS == 'success' }}
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: OpenWrt_${{ env.PACKAGED_OUTPUTDATE }}
+          tag_name: ${{ env.RELEASE_TAG }}
+          name: 🚀 斐讯N1 - ImmortalWrt ${{ env.RELEASE_TAG }}
           files: ${{ env.PACKAGED_OUTPUTPATH }}/*.img.xz
           body: |
-            🍁 注意: 首次使用建议全新刷写
-            💻 机型: 斐讯N1
-            📂 源码: ${{ env.REPO_URL }}
-            🌳 分支: ${{ env.REPO_BRANCH }}
-            ⌚ 时间: ${{ env.BUILD_TIME }}
-            🌐 地址: 192.168.1.2
-            👤 用户: root
-            🔒 密码: password
+            ### 📦 固件信息
+            - 💻 **机型**: 斐讯N1 (Amlogic S905D)
+            - 🌳 **源码**: [immortalwrt/immortalwrt](${{ env.REPO_URL }})
+            - 🌿 **分支**: `${{ env.REPO_BRANCH }}`
+            - 📅 **编译时间**: ${{ env.BUILD_TIME }}
+            - 🌏 **默认地址**: `192.168.1.2`
+            - 👤 **默认用户**: `root` / `password`
 
-      - name: Delete old releases
-        uses: sgpublic/delete-release-action@master
-        with:
-          release-drop: true
-          pre-release-drop: false
-          draft-drop: false
-          release-keep-count: 1
+            ---
+            *注意：首次从官推或其他系统刷入建议全盘刷写。*
