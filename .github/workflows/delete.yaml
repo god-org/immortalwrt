@@ -22,7 +22,7 @@ jobs:
         run: |
           RUN_COUNT=$(gh run list --limit 2 | wc -l)
           REL_COUNT=$(gh release list --limit 1 | wc -l)
-          PKG_COUNT=$(gh api --paginate "orgs/${{ github.repository_owner }}/packages?package_type=container" --jq ".[] | select(.repository.name == \"${{ github.event.repository.name }}\") | .name" | wc -l)
+          PKG_COUNT=$(gh api --paginate "/orgs/${{ github.repository_owner }}/packages" -f package_type=container --jq ".[] | select(.repository.name == \"${{ github.event.repository.name }}\") | .name" | wc -l)
           echo "run_count=$RUN_COUNT" >> $GITHUB_OUTPUT
           echo "rel_count=$REL_COUNT" >> $GITHUB_OUTPUT
           echo "pkg_count=$PKG_COUNT" >> $GITHUB_OUTPUT
