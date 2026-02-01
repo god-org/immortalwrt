@@ -1,0 +1,12 @@
+#!/bin/sh
+
+TARGET="/etc/init.d/reboot_run"
+
+if [ -f "$TARGET" ]; then
+    if [ ! -x "$TARGET" ]; then
+        chmod +x "$TARGET"
+    fi
+    "$TARGET" enable
+fi
+
+exit 0

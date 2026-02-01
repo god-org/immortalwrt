@@ -79,9 +79,9 @@ jobs:
         run: |
           make -j$(nproc) || make -j1 || make -j1 V=s
           echo "compile_status=success" >> $GITHUB_ENV
-          echo "RELEASE_NAME=🚀 斐讯N1 | ImmortalWrt | ( $(date +"%Y.%m.%d @ %H:%M") )" >> $GITHUB_ENV
-          echo "RELEASE_TAG=$(date +"%Y.%m.%d_%H.%M")" >> $GITHUB_ENV
-          echo "BUILD_TIME=$(date +"%Y年%m月%d日 %H时%M分")" >> $GITHUB_ENV
+          echo "RELEASE_NAME=$(date +"%Y-%m-%d %H:%M:%S")" >> $GITHUB_ENV
+          echo "RELEASE_TAG=$(date +"%Y.%m.%d_%H.%M.%S")" >> $GITHUB_ENV
+          echo "BUILD_TIME=$(date +"%Y年%m月%d日 %H时%M分%S秒")" >> $GITHUB_ENV
 
       - name: Package armsr as openwrt
         if: ${{ env.compile_status == 'success' }}
