@@ -20,40 +20,11 @@ jobs:
       - name: Check Resource Status
         id: status
         run: |
-          # 1. 打印基础环境信息，看看变量到底拿到了什么
-          echo "Debug: Repository Owner is [${{ github.repository_owner }}]"
-          echo "Debug: Full Repository is [${{ github.repository }}]"
-          echo "Debug: Event Name is [${{ github.event_name }}]"
-
-          # 2. 尝试获取数量（即使报错也继续执行）
-          RUN_COUNT=$(gh run list --limit 2 | wc -l || echo "0")
-          REL_COUNT=$(gh release list --limit 1 | wc -l || echo "0")
-
-          # 3. 核心排查：分别测试 Org 和 User 两个接口，看哪一个报 404
-          echo "--- Testing Org Endpoint ---"
-          ORG_TEST=$(gh api "/orgs/${{ github.repository_owner }}/packages" -f package_type=container --jq 'length' 2>&1 || echo "ORG_FAILED")
-          echo "Org Test Result: $ORG_TEST"
-
-          echo "--- Testing User Endpoint ---"
-          USER_TEST=$(gh api "/users/${{ github.repository_owner }}/packages" -f package_type=container --jq 'length' 2>&1 || echo "USER_FAILED")
-          echo "User Test Result: $USER_TEST"
-
-          # 4. 赋值给真正需要的变量（这里我们先用一个安全的逻辑）
-          # 如果 Org 接口成功了就用 Org，否则用 User
-          if [[ "$ORG_TEST" != *"FAILED"* && "$ORG_TEST" != *"Not Found"* ]]; then
-             ENDPOINT="orgs"
-          else
-             ENDPOINT="users"
-          fi
-
           REPO_NAME=${GITHUB_REPOSITORY#*/}
-          PKG_COUNT=$(gh api --paginate "/$ENDPOINT/${{ github.repository_owner }}/packages" \
-            -f package_type=container \
-            --jq ".[] | select(.repository.name == \"$REPO_NAME\") | .name" 2>/dev/null | wc -l || echo "0")
-
-          echo "Final Counts -> Run: $RUN_COUNT, Rel: $REL_COUNT, Pkg: $PKG_COUNT"
-
-          # 5. 输出到系统
+          RUN_COUNT=$(gh run list --limit 2 2>/dev/null | wc -l)
+          REL_COUNT=$(gh release list --limit 1 2>/dev/null | wc -l)
+          PKG_COUNT=$(gh api --paginate "/orgs/${{ github.repository_owner }}/packages?package_type=container" \
+            --jq ".[] | select(.repository.name == \"$REPO_NAME\") | .name" 2>/dev/null | wc -l)
           echo "run_count=$RUN_COUNT" >> $GITHUB_OUTPUT
           echo "rel_count=$REL_COUNT" >> $GITHUB_OUTPUT
           echo "pkg_count=$PKG_COUNT" >> $GITHUB_OUTPUT
