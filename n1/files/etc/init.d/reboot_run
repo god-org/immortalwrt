@@ -2,11 +2,14 @@
 
 START=99
 start() {
-    local TARGET="/root/scripts/cron_runner.sh"
-    if [ -f "$TARGET" ]; then
-        if [ ! -x "$TARGET" ]; then
-            chmod u+x "$TARGET"
-        fi
-        "$TARGET" reboot &
-    fi
+	local TARGET="/root/scripts/cron_runner.sh"
+	if [ -f "$TARGET" ]; then
+		if [ ! -x "$TARGET" ]; then
+			chmod u+x "$TARGET"
+		fi
+		export HOME="/root"
+		export USER="root"
+		cd /root
+		"$TARGET" reboot &
+	fi
 }
