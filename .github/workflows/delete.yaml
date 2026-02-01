@@ -22,15 +22,9 @@ jobs:
         with:
           release-drop: true
           release-keep-count: 10
-          release-drop-tag: true
-          pre-release-drop: true
-          pre-release-keep-count: -1
-          pre-release-drop-tag: true
-          draft-drop: true
-          draft-drop-count: -1
 
-      - name: ghcr.io cleanup action
-        uses: dataaxiom/ghcr-cleanup-action@v1
-        with:
-          keep-n-untagged: 0
-          keep-n-tagged: 10
+      # - name: ghcr.io cleanup action
+      #   uses: dataaxiom/ghcr-cleanup-action@v1
+      #   with:
+      #     keep-n-untagged: 0
+      #     keep-n-tagged: 10
