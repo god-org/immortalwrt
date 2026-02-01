@@ -16,11 +16,14 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: checkout
+        uses: actions/checkout@v6
+
       - name: Get Commit Hash
         id: getHash
         run: |
-          git clone -b $REPO_BRANCH --single-branch --depth=1 $REPO_URL .
-          echo "commitHash=$(git rev-parse HEAD)" >> $GITHUB_OUTPUT
+          hash=$(git ls-remote ${{ env.REPO_URL }} ${{ env.REPO_BRANCH }} | awk '{print $1}')
+          echo "commitHash=$hash" >> $GITHUB_OUTPUT
 
       - name: Compare Commit Hash
         id: cacheHash
@@ -30,10 +33,10 @@ jobs:
           key: commitHash_${{ steps.getHash.outputs.commitHash }}
 
       - name: Save New Commit Hash
-        if: ${{ steps.cacheHash.outputs.cache-hit != 'true' }}
+        if: steps.cacheHash.outputs.cache-hit != 'true'
         run: |
-          echo ${{ steps.getHash.outputs.commitHash }} | tee .commitHash
+          echo "${{ steps.getHash.outputs.commitHash }}" | tee .commitHash
 
       - name: Invoke workflow
-        if: ${{ steps.cacheHash.outputs.cache-hit != 'true' }}
-        run: gh workflow run Build -R ${{ github.repository }}
+        if: steps.cacheHash.outputs.cache-hit != 'true'
+        run: gh workflow run Build
