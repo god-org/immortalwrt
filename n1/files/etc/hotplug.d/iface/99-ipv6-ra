@@ -1,0 +1,5 @@
+#!/bin/sh
+
+if [ "$ACTION" = "ifup" ] && [ "$DEVICE" = "br-lan" ]; then
+    echo 2 >/proc/sys/net/ipv6/conf/br-lan/accept_ra
+fi

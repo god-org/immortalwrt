@@ -14,18 +14,31 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - name: Check Resource Status
+        id: status
+        run: |
+          RUN_COUNT=$(gh run list --limit 2 | wc -l)
+          REL_COUNT=$(gh release list --limit 1 | wc -l)
+          PKG_COUNT=$(gh api --paginate "orgs/${{ github.repository_owner }}/packages?package_type=container" --jq ".[] | select(.repository.name == \"${{ github.event.repository.name }}\") | .name" | wc -l)
+          echo "run_count=$RUN_COUNT" >> $GITHUB_OUTPUT
+          echo "rel_count=$REL_COUNT" >> $GITHUB_OUTPUT
+          echo "pkg_count=$PKG_COUNT" >> $GITHUB_OUTPUT
+
       - name: Delete old workflow runs
+        if: steps.status.outputs.run_count > 1
         uses: Mattraks/delete-workflow-runs@v2
 
-      # - name: ghcr.io cleanup action
-      #   uses: dataaxiom/ghcr-cleanup-action@v1
-      #   with:
-      #     keep-n-untagged: 0
-      #     keep-n-tagged: 10
-
       - name: Delete old releases
+        if: steps.status.outputs.rel_count != 0
         uses: sgpublic/delete-release-action@v1.2
         with:
           release-drop: true
           release-keep-count: 10
           draft-drop: false
+
+      - name: ghcr.io cleanup action
+        if: steps.status.outputs.pkg_count != 0
+        uses: dataaxiom/ghcr-cleanup-action@v1
+        with:
+          keep-n-untagged: 0
+          keep-n-tagged: 10
