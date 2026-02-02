@@ -20,10 +20,9 @@ jobs:
       - name: Check Resource Status
         id: status
         run: |
-          REPO_NAME=${GITHUB_REPOSITORY#*/}
-          RUN_COUNT=$(gh run list --limit 2 | wc -l)
-          REL_COUNT=$(gh release list --limit 1 | wc -l)
-          PKG_COUNT=$(gh api "/orgs/${{ github.repository_owner }}/packages/container/$REPO_NAME" && echo 1 || echo 0)
+          RUN_COUNT=$(gh run list --limit 2 2>/dev/null | wc -l)
+          REL_COUNT=$(gh release list --limit 1 2>/dev/null | wc -l)
+          PKG_COUNT=$(gh api "/orgs/${{ github.repository_owner }}/packages/container/${{ github.event.repository.name }}" &>/dev/null && echo 1 || echo 0)
           echo "$RUN_COUNT"
           echo "$REL_COUNT"
           echo "$PKG_COUNT"
