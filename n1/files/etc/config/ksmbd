@@ -19,7 +19,7 @@ config share
 	option read_only 'no'
 	option guest_ok 'no'
 	option hide_dot_files 'no'
-	option create_mask '0600'
-	option dir_mask '0700'
+	option create_mask '0644'
+	option dir_mask '0755'
 	option users 'root'
 
