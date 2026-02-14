@@ -1,0 +1,43 @@
+name: Check
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+  workflow_dispatch:
+
+env:
+  REPO_URL: https://github.com/immortalwrt/immortalwrt
+  REPO_BRANCH: openwrt-24.10
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  TZ: Asia/Shanghai
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 检出当前仓库代码
+        uses: actions/checkout@v6
+
+      - name: 获取远程最新提交哈希
+        id: getHash
+        run: |
+          hash="$(git ls-remote "$REPO_URL" "$REPO_BRANCH" | awk '{print $1}')"
+          echo "commitHash=$hash" >>"$GITHUB_OUTPUT"
+
+      - name: 对比提交哈希（缓存校验）
+        id: cacheHash
+        uses: actions/cache@v5
+        with:
+          path: .commitHash
+          key: commitHash_${{ steps.getHash.outputs.commitHash }}
+
+      - name: 保存新的提交哈希到文件
+        if: steps.cacheHash.outputs.cache-hit != 'true'
+        run: |
+          echo "${{ steps.getHash.outputs.commitHash }}" | tee .commitHash
+
+      - name: 触发构建工作流
+        if: steps.cacheHash.outputs.cache-hit != 'true'
+        run: |
+          gh workflow run "Build"

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+RA_FILE="/proc/sys/net/ipv6/conf/br-lan/accept_ra"
+
+if [ "$ACTION" = "ifup" ] && [ "$DEVICE" = "br-lan" ]; then
+    if [ -f "$RA_FILE" ] && [ "$(cat "$RA_FILE")" -ne 2 ]; then
+        echo 2 >"$RA_FILE"
+    fi
+fi
+
+unset "RA_FILE"

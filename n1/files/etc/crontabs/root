@@ -1,0 +1,4 @@
+0 * * * * $HOME/scripts/cron_runner.sh hourly >/dev/null 2>&1
+0 4 * * * $HOME/scripts/cron_runner.sh daily >/dev/null 2>&1
+0 5 * * 1 $HOME/scripts/cron_runner.sh weekly >/dev/null 2>&1
+0 6 1 * * $HOME/scripts/cron_runner.sh monthly >/dev/null 2>&1

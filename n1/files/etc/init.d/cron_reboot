@@ -1,0 +1,21 @@
+#!/bin/sh /etc/rc.common
+
+START=99
+
+start() {
+	local owner="root"
+	local target="/$owner/scripts/cron_runner.sh"
+
+	if [ -f "$target" ]; then
+		if [ ! -x "$target" ]; then
+			chmod u+x "$target"
+		fi
+
+		export HOME="/$owner"
+		export USER="$owner"
+
+		cd "/$owner"
+
+		"$target" reboot &
+	fi
+}
