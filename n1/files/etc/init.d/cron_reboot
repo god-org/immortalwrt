@@ -3,19 +3,19 @@
 START=99
 
 start() {
-	local owner="root"
-	local target="/$owner/scripts/cron_runner.sh"
+	local owner=root
+	local target=/$owner/scripts/cron_runner.sh
 
-	if [ -f "$target" ]; then
-		if [ ! -x "$target" ]; then
-			chmod u+x "$target"
+	if [ -f $target ]; then
+		if [ ! -x $target ]; then
+			chmod u+x $target
 		fi
 
-		export HOME="/$owner"
-		export USER="$owner"
+		export HOME=/$owner
+		export USER=$owner
 
-		cd "/$owner"
+		cd /$owner
 
-		"$target" reboot &
+		$target reboot &
 	fi
 }

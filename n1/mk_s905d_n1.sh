@@ -42,14 +42,14 @@ TGT_IMG="${WORK_DIR}/openwrt_${SOC}_${BOARD}_${OPENWRT_VER}_k${KERNEL_VERSION}${
 ###########################################################################
 KMOD="${PWD}/files/kmod"
 KMOD_BLACKLIST="${PWD}/files/kmod_blacklist"
-# MAC_SCRIPT1="${PWD}/files/fix_wifi_macaddr.sh"
-# MAC_SCRIPT2="${PWD}/files/find_macaddr.pl"
-# MAC_SCRIPT3="${PWD}/files/inc_macaddr.pl"
+#MAC_SCRIPT1="${PWD}/files/fix_wifi_macaddr.sh"
+#MAC_SCRIPT2="${PWD}/files/find_macaddr.pl"
+#MAC_SCRIPT3="${PWD}/files/inc_macaddr.pl"
 CPUSTAT_SCRIPT="${PWD}/files/cpustat"
 CPUSTAT_SCRIPT_PY="${PWD}/files/cpustat.py"
-# INDEX_PATCH_HOME="${PWD}/files/index.html.patches"
+#INDEX_PATCH_HOME="${PWD}/files/index.html.patches"
 GETCPU_SCRIPT="${PWD}/files/getcpu"
-# TTYD="${PWD}/files/ttyd"
+#TTYD="${PWD}/files/ttyd"
 FLIPPY="${PWD}/files/scripts_deprecated/flippy_cn"
 BANNER="${PWD}/files/banner"
 
@@ -59,14 +59,14 @@ SMB4_PATCH="${PWD}/files/smb4.11_enable_smb1.patch"
 SYSCTL_CUSTOM_CONF="${PWD}/files/99-custom.conf"
 
 # 20200709 add
-# COREMARK="${PWD}/files/coremark.sh"
+#COREMARK="${PWD}/files/coremark.sh"
 
 # 20200930 add
-# SND_MOD="${PWD}/files/s905d/snd-meson-gx"
-# DAEMON_JSON="${PWD}/files/s905d/daemon.json"
+#SND_MOD="${PWD}/files/s905d/snd-meson-gx"
+#DAEMON_JSON="${PWD}/files/s905d/daemon.json"
 
 # 20201006 add
-# FORCE_REBOOT="${PWD}/files/s905d/reboot"
+#FORCE_REBOOT="${PWD}/files/s905d/reboot"
 # 20201017 add
 BAL_ETH_IRQ="${PWD}/files/balethirq.pl"
 # 20201026 add
@@ -74,7 +74,7 @@ FIX_CPU_FREQ="${PWD}/files/fixcpufreq.pl"
 SYSFIXTIME_PATCH="${PWD}/files/sysfixtime.patch"
 
 # 20201128 add
-# SSL_CNF_PATCH="${PWD}/files/openssl_engine.patch"
+#SSL_CNF_PATCH="${PWD}/files/openssl_engine.patch"
 
 # 20201212 add
 BAL_CONFIG="${PWD}/files/s905d/balance_irq"
@@ -87,15 +87,15 @@ UBOOT_WITHOUT_FIP_HOME="${PWD}/files/meson_btld/without_fip"
 UBOOT_WITHOUT_FIP="u-boot-n1.bin"
 
 # 20210208 add
-# WIRELESS_CONFIG="${PWD}/files/s905d/wireless"
+#WIRELESS_CONFIG="${PWD}/files/s905d/wireless"
 
 # 20210307 add
-# SS_LIB="${PWD}/files/ss-glibc/lib-glibc.tar.xz"
-# SS_BIN="${PWD}/files/ss-glibc/armv8a_crypto/ss-bin-glibc.tar.xz"
-# JQ="${PWD}/files/jq"
+#SS_LIB="${PWD}/files/ss-glibc/lib-glibc.tar.xz"
+#SS_BIN="${PWD}/files/ss-glibc/armv8a_crypto/ss-bin-glibc.tar.xz"
+#JQ="${PWD}/files/jq"
 
 # 20210330 add
-# DOCKERD_PATCH="${PWD}/files/dockerd.patch"
+#DOCKERD_PATCH="${PWD}/files/dockerd.patch"
 
 # 20200416 add
 FIRMWARE_TXZ="${PWD}/files/firmware_armbian.tar.xz"
@@ -103,7 +103,7 @@ BOOTFILES_HOME="${PWD}/files/bootfiles/amlogic"
 GET_RANDOM_MAC="${PWD}/files/get_random_mac.sh"
 
 # 20210618 add
-# DOCKER_README="${PWD}/files/DockerReadme.pdf"
+#DOCKER_README="${PWD}/files/DockerReadme.pdf"
 
 # 20210704 add
 SYSINFO_SCRIPT="${PWD}/files/30-sysinfo.sh"
@@ -123,12 +123,12 @@ BTLD_BIN="${PWD}/files/s905d/u-boot-2015-phicomm-n1.bin"
 # 20211024 add
 MODEL_DB="${PWD}/files/amlogic_model_database.txt"
 # 20211214 add
-# P7ZIP="${PWD}/files/7z"
+#P7ZIP="${PWD}/files/7z"
 # 20211217 add
 DDBR="${PWD}/files/openwrt-ddbr"
 # 20220225 add
-# SSH_CIPHERS="aes128-gcm@openssh.com,aes256-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr,chacha20-poly1305@openssh.com"
-# SSHD_CIPHERS="aes128-gcm@openssh.com,aes256-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr"
+#SSH_CIPHERS="aes128-gcm@openssh.com,aes256-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr,chacha20-poly1305@openssh.com"
+#SSHD_CIPHERS="aes128-gcm@openssh.com,aes256-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr"
 ###########################################################################
 
 check_depends
@@ -174,21 +174,21 @@ echo
 echo "修改根文件系统相关配置 ... "
 cd $TGT_ROOT
 copy_supplement_files
-# extract_glibc_programs
-# adjust_docker_config
-# adjust_openssl_config
-# adjust_qbittorrent_config
+#extract_glibc_programs
+#adjust_docker_config
+#adjust_openssl_config
+#adjust_qbittorrent_config
 adjust_getty_config
-# adjust_samba_config
-# adjust_nfs_config "mmcblk2p4"
-# adjust_openssh_config
-# adjust_openclash_config
-# use_xrayplug_replace_v2rayplug
+#adjust_samba_config
+#adjust_nfs_config "mmcblk2p4"
+#adjust_openssh_config
+#adjust_openclash_config
+#use_xrayplug_replace_v2rayplug
 create_fstab_config
-# adjust_turboacc_config
-# adjust_ntfs_config
-# adjust_mosdns_config
-# patch_admin_status_index_html
+#adjust_turboacc_config
+#adjust_ntfs_config
+#adjust_mosdns_config
+#patch_admin_status_index_html
 adjust_kernel_env
 copy_uboot_to_fs
 write_release_info

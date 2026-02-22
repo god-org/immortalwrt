@@ -1,13 +1,15 @@
 #!/bin/sh
 
-TARGET="/etc/init.d/cron_reboot"
+set -euo pipefail
 
-if [ -f "$TARGET" ]; then
-    if [ ! -x "$TARGET" ]; then
-        chmod +x "$TARGET"
+TARGET=/etc/init.d/cron_reboot
+
+if [ -f $TARGET ]; then
+    if [ ! -x $TARGET ]; then
+        chmod +x $TARGET
     fi
 
-    "$TARGET" enable
+    $TARGET enable
 fi
 
 exit 0
