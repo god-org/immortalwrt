@@ -8,11 +8,6 @@ on:
         description: 启用 tmate 远程调试
         required: false
         default: false
-      trace_enabled:
-        type: boolean
-        description: 开启脚本跟踪
-        required: false
-        default: false
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -38,7 +33,6 @@ jobs:
         shell: bash
         env:
           SCRIPT_FILE: .github/scripts/build_orchestrator.sh
-          TRACE_ENABLED: ${{ inputs.trace_enabled }}
           DEBIAN_FRONTEND: noninteractive
           DEPENDENCIES_FILE: n1/dependencies
           REPO_URL: https://github.com/immortalwrt/immortalwrt
@@ -47,9 +41,9 @@ jobs:
           CONFIG_FILE: n1/.config
           DIY_SCRIPT: n1/diy.sh
         run: |
+          set -euxo pipefail
           [[ ! -x "${SCRIPT_FILE}" ]] && chmod +x "${SCRIPT_FILE}"
-          [[ "${TRACE_ENABLED}" == "true" ]] && echo "set -x" >>"$BASH_ENV"
-          "${SCRIPT_FILE}"
+          "./${SCRIPT_FILE}"
 
       - name: 上传 ImmortalWrt 编译文件
         if: env.compile_status == 'success'

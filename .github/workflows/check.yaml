@@ -23,6 +23,7 @@ jobs:
           REPO_URL: https://github.com/immortalwrt/immortalwrt
           REPO_BRANCH: openwrt-24.10
         run: |
+          set -euxo pipefail
           remote_output=$(git ls-remote "${REPO_URL}" "${REPO_BRANCH}")
           commit_hash="${remote_output%%[[:space:]]*}"
           echo "commitHash=${commit_hash}" >>"${GITHUB_OUTPUT}"
@@ -40,10 +41,12 @@ jobs:
         env:
           NEW_HASH: ${{ steps.getHash.outputs.commitHash }}
         run: |
+          set -euxo pipefail
           echo "${NEW_HASH}" >.commitHash
 
       - name: 触发构建工作流
         if: steps.cacheHash.outputs.cache-hit != 'true'
         shell: bash
         run: |
+          set -euxo pipefail
           gh workflow run Build
