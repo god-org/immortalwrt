@@ -65,6 +65,9 @@ function apply_customization() {
     [[ ! -x "${diy_script}" ]] && chmod +x "${diy_script}"
     "${diy_script}"
   fi
+
+  ls -AFlih --full-time --group-directories-first --color=auto "${SOURCE_DIR}"
+  ls -AFlih --full-time --group-directories-first --color=auto "${SOURCE_DIR}/package"
 }
 
 function download_dependencies() {
