@@ -20,7 +20,7 @@ function error() {
 
 function init_build_env() {
   local deps_path tz_val
-  deps_path="${GITHUB_WORKSPACE:-.}/${DEPENDENCIES_FILE:-}"
+  deps_path="${GITHUB_WORKSPACE:-.}/${IMM_DEPS_LIST:-}"
   tz_val="${TZ:-Asia/Shanghai}"
 
   log "正在初始化编译环境并安装依赖"
@@ -37,8 +37,8 @@ function init_build_env() {
 
 function setup_source_code() {
   local repo_url repo_branch
-  repo_url="${REPO_URL:-}"
-  repo_branch="${REPO_BRANCH:-}"
+  repo_url="${IMM_REPO_URL:-}"
+  repo_branch="${IMM_REPO_BRANCH:-}"
 
   log "正在克隆源码仓库：${repo_branch}"
   git clone -b "${repo_branch}" --depth=1 --single-branch "${repo_url}" "${SOURCE_DIR}"
@@ -53,9 +53,9 @@ function manage_feeds() {
 
 function apply_customization() {
   local files_src config_src diy_script
-  files_src="${GITHUB_WORKSPACE:-.}/${FILES_DIR:-}"
-  config_src="${GITHUB_WORKSPACE:-.}/${CONFIG_FILE:-}"
-  diy_script="${GITHUB_WORKSPACE:-.}/${DIY_SCRIPT:-}"
+  files_src="${GITHUB_WORKSPACE:-.}/${CUSTOM_FILES_PATH:-}"
+  config_src="${GITHUB_WORKSPACE:-.}/${CUSTOM_DOT_CONFIG:-}"
+  diy_script="${GITHUB_WORKSPACE:-.}/${CUSTOM_DIY_SCRIPT:-}"
 
   log "正在应用自定义配置与 DIY 脚本"
   [[ -d "${files_src}" ]] && mv -f "${files_src}" "${SOURCE_DIR}/"
@@ -65,9 +65,6 @@ function apply_customization() {
     [[ ! -x "${diy_script}" ]] && chmod +x "${diy_script}"
     "${diy_script}"
   fi
-
-  ls -AFlih --full-time --group-directories-first --color=auto "${SOURCE_DIR}"
-  ls -AFlih --full-time --group-directories-first --color=auto "${SOURCE_DIR}/package"
 }
 
 function download_dependencies() {
