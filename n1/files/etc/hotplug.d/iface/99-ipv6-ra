@@ -2,12 +2,27 @@
 
 set -euo pipefail
 
-RA_FILE=/proc/sys/net/ipv6/conf/br-lan/accept_ra
+IPV6_ACCEPT_RA_PATH='/proc/sys/net/ipv6/conf/br-lan/accept_ra'
 
-if [ $ACTION = ifup ] && [ $DEVICE = br-lan ]; then
-    if [ -f $RA_FILE ] && [ $(cat $RA_FILE) -ne 2 ]; then
-        echo 2 >$RA_FILE
+configure_ipv6_ra() {
+  local current_ra_val
+
+  if [ -f "${IPV6_ACCEPT_RA_PATH}" ]; then
+    read -r current_ra_val <"${IPV6_ACCEPT_RA_PATH}"
+
+    if [ "${current_ra_val}" -ne 2 ]; then
+      echo '2' >"${IPV6_ACCEPT_RA_PATH}"
     fi
-fi
+  fi
+}
 
-unset RA_FILE
+main() {
+  if [ "${ACTION:-}" = 'ifup' ] && [ "${DEVICE:-}" = 'br-lan' ]; then
+    configure_ipv6_ra
+  fi
+}
+
+main "$@"
+
+unset -f configure_ipv6_ra main
+unset IPV6_ACCEPT_RA_PATH
