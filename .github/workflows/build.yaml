@@ -34,12 +34,12 @@ jobs:
         env:
           SCRIPT_FILE: .github/scripts/build_orchestrator.sh
           DEBIAN_FRONTEND: noninteractive
-          IMM_DEPS_LIST: n1/dependencies
-          IMM_REPO_URL: https://github.com/immortalwrt/immortalwrt
-          IMM_REPO_BRANCH: openwrt-24.10
-          CUSTOM_FILES_PATH: n1/files
-          CUSTOM_DOT_CONFIG: n1/.config
-          CUSTOM_DIY_SCRIPT: n1/diy.sh
+          DEPENDENCIES_FILE: n1/dependencies
+          REPO_URL: https://github.com/immortalwrt/immortalwrt
+          REPO_BRANCH: openwrt-24.10
+          DIY_FILES: n1/files
+          DIY_CONFIG: n1/.config
+          DIY_SCRIPT: n1/diy.sh
         run: |
           set -euxo pipefail
           [[ ! -x "${SCRIPT_FILE}" ]] && chmod +x "${SCRIPT_FILE}"
@@ -77,17 +77,14 @@ jobs:
           body: |
             ### 📦 固件信息
             - 💻 **机型**: 斐讯N1 ( Amlogic S905D )
-            - 🌳 **源码**: [immortalwrt/immortalwrt](${{ env.IMM_REPO_URL }})
-            - 🌿 **分支**: `${{ env.IMM_REPO_BRANCH }}`
+            - 🌳 **源码**: [immortalwrt/immortalwrt](https://github.com/immortalwrt/immortalwrt)
+            - 🌿 **分支**: `openwrt-24.10`
             - 📅 **编译时间**: ${{ env.BUILD_TIME }}
             - 🌏 **默认地址**: `192.168.1.2`
             - 👤 **默认用户**: `root`
             - 🔒 **默认密码**: `password`
             ---
             ⚠️ **注意事项**: 首次使用建议全新刷写
-        env:
-          IMM_REPO_URL: https://github.com/immortalwrt/immortalwrt
-          IMM_REPO_BRANCH: openwrt-24.10
 
       - name: 发送构建结果至 Telegram
         uses: appleboy/telegram-action@v1.0.1

@@ -1,27 +1,9 @@
 #!/bin/sh
 
-set -euo pipefail
-
-INIT_SERVICE_PATH='/etc/init.d/cron_reboot'
-
-enable_cron_service() {
-  local service_file
-  service_file="${INIT_SERVICE_PATH}"
-
-  if [ -f "${service_file}" ]; then
-    if [ ! -x "${service_file}" ]; then
-      chmod +x "${service_file}"
-    fi
-
-    "${service_file}" enable
+if [ -f '/etc/init.d/cron_reboot' ]; then
+  if [ ! -x '/etc/init.d/cron_reboot' ]; then
+    chmod +x /etc/init.d/cron_reboot
   fi
-}
 
-main() {
-  enable_cron_service
-}
-
-main "$@"
-
-unset -f enable_cron_service main
-unset INIT_SERVICE_PATH
+  /etc/init.d/cron_reboot enable
+fi
