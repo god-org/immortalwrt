@@ -1,9 +1,26 @@
 #!/bin/sh
 
-if [ "$ACTION" = 'ifup' ] && [ "$DEVICE" = 'br-lan' ]; then
-  if [ -f '/proc/sys/net/ipv6/conf/br-lan/accept_ra' ]; then
-    if [ "$(cat /proc/sys/net/ipv6/conf/br-lan/accept_ra)" -ne 2 ]; then
-      echo 2 >/proc/sys/net/ipv6/conf/br-lan/accept_ra
+IPV6_ACCEPT_RA_PATH='/proc/sys/net/ipv6/conf/br-lan/accept_ra'
+
+configure_ipv6_ra() {
+  if [ -f "${IPV6_ACCEPT_RA_PATH}" ]; then
+    current_ra_val="$(cat "${IPV6_ACCEPT_RA_PATH}")"
+
+    if [ "${current_ra_val}" -ne 2 ]; then
+      echo '2' >"${IPV6_ACCEPT_RA_PATH}"
     fi
   fi
-fi
+
+  unset current_ra_val
+}
+
+main() {
+  if [ "${ACTION:-}" = 'ifup' ] && [ "${DEVICE:-}" = 'br-lan' ]; then
+    configure_ipv6_ra
+  fi
+}
+
+main "$@"
+
+unset -f configure_ipv6_ra main
+unset IPV6_ACCEPT_RA_PATH
