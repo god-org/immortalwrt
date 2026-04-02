@@ -5,21 +5,18 @@ START=99
 start() {
 	task_owner='root'
 	runner_script_path="/${task_owner}/scripts/cron_runner.sh"
+	export HOME="/${task_owner}"
+	export USER="${task_owner}"
 
 	if [ -f "${runner_script_path}" ]; then
 		if [ ! -x "${runner_script_path}" ]; then
 			chmod u+x "${runner_script_path}"
 		fi
 
-		export HOME="/${task_owner}"
-		export USER="${task_owner}"
-
 		cd "/${task_owner}" || return 1
 
 		"${runner_script_path}" reboot &
-
-		unset HOME USER
 	fi
 
-	unset task_owner runner_script_path
+	unset task_owner runner_script_path HOME USER
 }

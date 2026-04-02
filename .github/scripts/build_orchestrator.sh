@@ -1,21 +1,35 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 set -euxo pipefail
 
-if [[ "${BASH_VERSINFO[0]}" -lt 4 ]]; then
-  echo "❌ 要求 Bash 版本 ≥ 4.0，当前版本：${BASH_VERSION}。" >&2
+if ((BASH_VERSINFO[0] < 4)); then
+  printf '❌ 要求 Bash 版本 ≥ 4.0，当前版本：%s。\n' "${BASH_VERSION}" >&2
   exit 127
 fi
+
+umask 077
 
 SOURCE_DIR='/workdir/immortalwrt'
 WORKSPACE_LINK="${GITHUB_WORKSPACE:-.}/immortalwrt"
 
-function log() {
-  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] ✅：${*}。"
+function get_current_time() {
+  local time_format
+  local -n time_ptr="${2}"
+  time_format="${1:-%Y-%m-%d %H:%M:%S}"
+  # shellcheck disable=SC2034
+  printf -v time_ptr "%(${time_format})T" -1
 }
 
-function error() {
-  echo "[$(date +'%Y-%m-%dT%H:%M:%S%z')] ❌：${*}。" >&2
+function log_info() {
+  local log_time
+  get_current_time "" 'log_time'
+  printf '[%s] ✅：%s。\n' "${log_time}" "${*}"
+}
+
+function log_error() {
+  local log_time
+  get_current_time "" 'log_time'
+  printf '[%s] ❌：%s。\n' "${log_time}" "${*}" >&2
 }
 
 function init_build_env() {
@@ -23,7 +37,7 @@ function init_build_env() {
   deps_path="${GITHUB_WORKSPACE:-.}/${DEPENDENCIES_FILE:-}"
   tz_val="${TZ:-Asia/Shanghai}"
 
-  log "正在初始化编译环境并安装依赖"
+  log_info "正在初始化编译环境并安装依赖"
   sudo -E apt-get -qq update
   # shellcheck disable=SC2046
   sudo -E apt-get -qq install $(<"${deps_path}")
@@ -40,13 +54,13 @@ function setup_source_code() {
   repo_url="${REPO_URL:-}"
   repo_branch="${REPO_BRANCH:-}"
 
-  log "正在克隆源码仓库：${repo_branch}"
+  log_info "正在克隆源码仓库：${repo_branch}"
   git clone -b "${repo_branch}" --depth=1 --single-branch "${repo_url}" "${SOURCE_DIR}"
   ln -sf "${SOURCE_DIR}" "${WORKSPACE_LINK}"
 }
 
 function manage_feeds() {
-  log "正在更新与安装 feeds 软件源"
+  log_info "正在更新与安装 feeds 软件源"
   ./scripts/feeds update -a
   ./scripts/feeds install -a
 }
@@ -57,7 +71,7 @@ function apply_customization() {
   config_src="${GITHUB_WORKSPACE:-.}/${DIY_CONFIG:-}"
   diy_script="${GITHUB_WORKSPACE:-.}/${DIY_SCRIPT:-}"
 
-  log "正在应用自定义配置与 DIY 脚本"
+  log_info "正在应用自定义配置与 DIY 脚本"
   [[ -d "${files_src}" ]] && mv -f "${files_src}" "${SOURCE_DIR}/"
   [[ -f "${config_src}" ]] && mv -f "${config_src}" "${SOURCE_DIR}/"
 
@@ -71,7 +85,7 @@ function download_dependencies() {
   local thread_count
   thread_count=$(nproc)
 
-  log "正在并行下载编译所需源码包"
+  log_info "正在并行下载编译所需源码包"
   make defconfig
   make download -j"${thread_count}"
 
@@ -83,12 +97,12 @@ function execute_compilation() {
   local thread_count
   thread_count=$(nproc)
 
-  log "开始执行固件编译逻辑"
+  log_info "开始执行固件编译逻辑"
 
   if make -j"${thread_count}" || make -j1 || make -j1 V=s; then
-    log "固件编译任务成功完成"
+    log_info "固件编译任务成功完成"
   else
-    error "固件编译过程发生失败"
+    log_error "固件编译过程发生失败"
     exit 1
   fi
 }
@@ -96,7 +110,7 @@ function execute_compilation() {
 function export_metadata() {
   local release_name release_tag build_time
 
-  printf -v release_name "%(%Y-%m-%dT%H:%M:%S%z)T" -1
+  printf -v release_name "%(%Y-%m-%d %H:%M:%S)T" -1
   printf -v release_tag "%(%Y%m%d%H%M%S)T" -1
   printf -v build_time "%(%Y年%m月%d日 %H时%M分%S秒)T" -1
 
