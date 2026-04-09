@@ -2,14 +2,12 @@ name: Clean
 
 on:
   schedule:
-    - cron: 0 0 * * 0
+    - cron: 0 0 * * *
   workflow_dispatch:
     inputs:
       deep_clean:
+        description: 彻底清理
         type: boolean
-        description: 启用彻底清理
-        required: false
-        default: false
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -18,53 +16,85 @@ env:
 jobs:
   clean:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -euxo pipefail {0}
     steps:
-      - name: 检出当前仓库代码
-        uses: actions/checkout@v6
+      - name: 检出代码
+        uses: actions/checkout@v6.0.2
 
-      - name: 检查仓库资源状态
+      - name: 检查状态
         id: status
-        shell: bash
         env:
+          GH_TOKEN: ${{ secrets.CLEAN_TOKEN }}
+          OWNER_TYPE: ${{ github.event.repository.owner.type }}
           REPO_OWNER: ${{ github.repository_owner }}
           REPO_NAME: ${{ github.event.repository.name }}
         run: |
-          set -euxo pipefail
-          mapfile -t run_list < <(gh run list --limit 2 2>/dev/null || :)
-          run_count="${#run_list[@]}"
+          [[ $OWNER_TYPE == Organization ]] && api_base=orgs || api_base=users
 
-          mapfile -t rel_list < <(gh release list --limit 1 2>/dev/null || :)
-          rel_count="${#rel_list[@]}"
+          run_count=$(gh run list -L 2 --json databaseId -q length || echo 0)
+          rel_count=$(gh release list -L 1 --json tagName -q length || echo 0)
+          pkg_raw=$(gh api "/$api_base/$REPO_OWNER/packages?package_type=container" \
+            --paginate -q '.[] | select(.repository.name == env.REPO_NAME) | .name' | sort -f || :)
 
-          pkg_count=$(gh api "/orgs/${REPO_OWNER}/packages/container/${REPO_NAME}" &>/dev/null && echo '1' || echo '0')
+          if [[ -n $pkg_raw ]]; then
+            mapfile -t pkg_array <<<"$pkg_raw"
+            pkg_count=${#pkg_array[@]}
+            IFS=, pkg_list="${pkg_array[*]}"
+          else
+            pkg_count=0
+            pkg_list=
+          fi
 
           {
-            echo "run_count=${run_count}"
-            echo "rel_count=${rel_count}"
-            echo "pkg_count=${pkg_count}"
-          } >>"${GITHUB_OUTPUT}"
+            echo "api_base=$api_base"
+            echo "run_count=$run_count"
+            echo "rel_count=$rel_count"
+            echo "pkg_count=$pkg_count"
+            echo "pkg_list=$pkg_list"
+          } >>"$GITHUB_OUTPUT"
 
       - name: 清理 Actions 运行记录
-        if: steps.status.outputs.run_count > '1'
-        uses: Mattraks/delete-workflow-runs@v2
+        if: steps.status.outputs.run_count > 1
+        uses: Mattraks/delete-workflow-runs@v2.1.0
         with:
-          retain_days: ${{ inputs.deep_clean && '0' || '30' }}
-          keep_minimum_runs: ${{ inputs.deep_clean && '0' || '6' }}
+          retain_days: ${{ inputs.deep_clean && -1 || 30 }}
+          keep_minimum_runs: ${{ inputs.deep_clean && -1 || 6 }}
 
       - name: 清理 GitHub 发布版本
-        if: steps.status.outputs.rel_count != '0'
+        if: steps.status.outputs.rel_count > 0
         uses: sgpublic/delete-release-action@v1.2
         with:
           release-drop: true
-          release-keep-count: ${{ inputs.deep_clean && '-1' || '10' }}
-          pre-release-drop: ${{ inputs.deep_clean && 'true' || 'false' }}
+          release-keep-count: ${{ inputs.deep_clean && -1 || 10 }}
+          pre-release-drop: ${{ inputs.deep_clean && true || false }}
           pre-release-keep-count: -1
-          draft-drop: ${{ inputs.deep_clean && 'true' || 'false' }}
+          draft-drop: ${{ inputs.deep_clean && true || false }}
           draft-drop-count: -1
 
-      - name: 清理 GHCR 镜像仓库
-        if: steps.status.outputs.pkg_count != '0'
-        uses: dataaxiom/ghcr-cleanup-action@v1
+      - name: 清理 GHCR 容器镜像
+        if: steps.status.outputs.pkg_count > 0
+        uses: dataaxiom/ghcr-cleanup-action@v1.0.16
         with:
+          packages: ${{ steps.status.outputs.pkg_list }}
           keep-n-untagged: 0
-          keep-n-tagged: ${{ inputs.deep_clean && '1' || '10' }}
+          keep-n-tagged: ${{ inputs.deep_clean && 1 || 10 }}
+
+      - name: 删除 Actions 缓存
+        if: github.event_name == 'workflow_dispatch' && inputs.deep_clean
+        run: |
+          gh cache delete -a --succeed-on-no-caches
+
+      - name: 删除 GHCR 容器镜像
+        if: github.event_name == 'workflow_dispatch' && inputs.deep_clean && steps.status.outputs.pkg_count > 0
+        env:
+          GH_TOKEN: ${{ secrets.CLEAN_TOKEN }}
+          PKG_LIST: ${{ steps.status.outputs.pkg_list }}
+          API_BASE: ${{ steps.status.outputs.api_base }}
+          REPO_OWNER: ${{ github.repository_owner }}
+        run: |
+          mapfile -t pkgs <<<"${PKG_LIST//,/$'\n'}"
+          for pkg in "${pkgs[@]}"; do
+            gh api -X DELETE "/$API_BASE/$REPO_OWNER/packages/container/$pkg" || :
+          done

@@ -3,20 +3,12 @@
 START=99
 
 start() {
-	task_owner='root'
-	runner_script_path="/${task_owner}/scripts/cron_runner.sh"
-	export HOME="/${task_owner}"
-	export USER="${task_owner}"
+	export HOME=/root
+	export USER=root
 
-	if [ -f "${runner_script_path}" ]; then
-		if [ ! -x "${runner_script_path}" ]; then
-			chmod u+x "${runner_script_path}"
-		fi
+	[ -f /root/scripts/cron_runner.sh ] || return 0
+	[ -x /root/scripts/cron_runner.sh ] || chmod +x /root/scripts/cron_runner.sh
 
-		cd "/${task_owner}" || return 1
-
-		"${runner_script_path}" reboot &
-	fi
-
-	unset task_owner runner_script_path HOME USER
+	cd "$HOME" || return 1
+	/root/scripts/cron_runner.sh reboot &
 }

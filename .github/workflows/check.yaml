@@ -12,41 +12,31 @@ env:
 jobs:
   check:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -euxo pipefail {0}
     steps:
-      - name: 检出当前仓库代码
-        uses: actions/checkout@v6
+      - name: 检出代码
+        uses: actions/checkout@v6.0.2
 
-      - name: 获取远程最新提交哈希
-        id: getHash
-        shell: bash
+      - name: 获取信息
+        id: get
         env:
-          REPO_URL: https://github.com/immortalwrt/immortalwrt
-          REPO_BRANCH: openwrt-24.10
+          IMW_REPO: immortalwrt/immortalwrt
+          IMW_BR: openwrt-24.10
         run: |
-          set -euxo pipefail
-          remote_output=$(git ls-remote "${REPO_URL}" "${REPO_BRANCH}")
-          commit_hash="${remote_output%%[[:space:]]*}"
-          echo "commitHash=${commit_hash}" >>"${GITHUB_OUTPUT}"
+          imw_sha=$(gh api "/repos/$IMW_REPO/commits/$IMW_BR" -q '.sha')
+          echo "cache=$imw_sha" >>"$GITHUB_OUTPUT"
 
-      - name: 对比提交哈希（缓存校验）
-        id: cacheHash
-        uses: actions/cache@v5
+      - name: 缓存校验
+        id: cache
+        uses: actions/cache@v5.0.4
         with:
-          path: .commitHash
-          key: commitHash_${{ steps.getHash.outputs.commitHash }}
+          path: .cache
+          key: ${{ steps.get.outputs.cache }}
 
-      - name: 保存新的提交哈希到文件
-        if: steps.cacheHash.outputs.cache-hit != 'true'
-        shell: bash
-        env:
-          NEW_HASH: ${{ steps.getHash.outputs.commitHash }}
+      - name: 触发工作流
+        if: steps.cache.outputs.cache-hit != 'true'
         run: |
-          set -euxo pipefail
-          echo "${NEW_HASH}" >.commitHash
-
-      - name: 触发构建工作流
-        if: steps.cacheHash.outputs.cache-hit != 'true'
-        shell: bash
-        run: |
-          set -euxo pipefail
+          >.cache
           gh workflow run Build

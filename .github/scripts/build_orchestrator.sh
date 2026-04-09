@@ -3,137 +3,96 @@
 set -euxo pipefail
 
 if ((BASH_VERSINFO[0] < 4)); then
-  printf '❌ 要求 Bash 版本 ≥ 4.0，当前版本：%s。\n' "${BASH_VERSION}" >&2
+  printf '❌ 要求 Bash 版本 ≥ 4.0，当前版本：%s。\n' "$BASH_VERSION" >&2
   exit 127
 fi
 
-umask 077
-
-SOURCE_DIR='/workdir/immortalwrt'
-WORKSPACE_LINK="${GITHUB_WORKSPACE:-.}/immortalwrt"
-
-function get_current_time() {
-  local time_format
-  local -n time_ptr="${2}"
-  time_format="${1:-%Y-%m-%d %H:%M:%S}"
-  # shellcheck disable=SC2034
-  printf -v time_ptr "%(${time_format})T" -1
+function log_info {
+  printf '[%(%F %T)T] ✅：%s。\n' -1 "$*" >&2
 }
 
-function log_info() {
-  local log_time
-  get_current_time "" 'log_time'
-  printf '[%s] ✅：%s。\n' "${log_time}" "${*}"
+function log_warn {
+  printf '[%(%F %T)T] ⚠️：%s。\n' -1 "$*" >&2
 }
 
-function log_error() {
-  local log_time
-  get_current_time "" 'log_time'
-  printf '[%s] ❌：%s。\n' "${log_time}" "${*}" >&2
+function log_error {
+  printf '[%(%F %T)T] ❌：%s。\n' -1 "$*" >&2
 }
 
-function init_build_env() {
-  local deps_path tz_val
-  deps_path="${GITHUB_WORKSPACE:-.}/${DEPENDENCIES_FILE:-}"
-  tz_val="${TZ:-Asia/Shanghai}"
-
+function init_build_env {
   log_info "正在初始化编译环境并安装依赖"
   sudo -E apt-get -qq update
-  # shellcheck disable=SC2046
-  sudo -E apt-get -qq install $(<"${deps_path}")
+  sudo -E apt-get -qq install $(<"$DEPENDENCIES_FILE")
   sudo -E apt-get -qq autoremove --purge
   sudo -E apt-get -qq clean
-  sudo timedatectl set-timezone "${tz_val}"
+  sudo timedatectl set-timezone "$TZ"
 
-  sudo mkdir -p "${SOURCE_DIR%/*}"
-  sudo chown "${USER}:${GROUPS[0]}" "${SOURCE_DIR%/*}"
+  sudo mkdir -p /workdir
+  sudo chown "$USER:" /workdir
 }
 
-function setup_source_code() {
-  local repo_url repo_branch
-  repo_url="${REPO_URL:-}"
-  repo_branch="${REPO_BRANCH:-}"
-
-  log_info "正在克隆源码仓库：${repo_branch}"
-  git clone -b "${repo_branch}" --depth=1 --single-branch "${repo_url}" "${SOURCE_DIR}"
-  ln -sf "${SOURCE_DIR}" "${WORKSPACE_LINK}"
+function setup_source_code {
+  log_info "正在克隆源码仓库：$REPO_BRANCH"
+  git clone -b "$REPO_BRANCH" --depth=1 --single-branch "$REPO_URL" /workdir/immortalwrt
+  ln -sf /workdir/immortalwrt immortalwrt
 }
 
-function manage_feeds() {
+function apply_customization {
+  log_info "正在应用自定义配置与 DIY 脚本"
+  [[ -d $DIY_FILES ]] && cp -af "$DIY_FILES" /workdir/immortalwrt/
+  [[ -f $DIY_CONFIG ]] && cp -af "$DIY_CONFIG" /workdir/immortalwrt/
+  [[ ! -x $DIY_SCRIPT ]] && chmod +x "$DIY_SCRIPT"
+  cd /workdir/immortalwrt && "$GITHUB_WORKSPACE/$DIY_SCRIPT"
+}
+
+function manage_feeds {
   log_info "正在更新与安装 feeds 软件源"
   ./scripts/feeds update -a
   ./scripts/feeds install -a
 }
 
-function apply_customization() {
-  local files_src config_src diy_script
-  files_src="${GITHUB_WORKSPACE:-.}/${DIY_FILES:-}"
-  config_src="${GITHUB_WORKSPACE:-.}/${DIY_CONFIG:-}"
-  diy_script="${GITHUB_WORKSPACE:-.}/${DIY_SCRIPT:-}"
-
-  log_info "正在应用自定义配置与 DIY 脚本"
-  [[ -d "${files_src}" ]] && mv -f "${files_src}" "${SOURCE_DIR}/"
-  [[ -f "${config_src}" ]] && mv -f "${config_src}" "${SOURCE_DIR}/"
-
-  if [[ -f "${diy_script}" ]]; then
-    [[ ! -x "${diy_script}" ]] && chmod +x "${diy_script}"
-    "${diy_script}"
-  fi
-}
-
-function download_dependencies() {
-  local thread_count
-  thread_count=$(nproc)
-
+function download_dependencies {
   log_info "正在并行下载编译所需源码包"
   make defconfig
-  make download -j"${thread_count}"
+  make download -j"$(nproc)"
 
   find dl -size -1024c -exec ls -l {} \;
   find dl -size -1024c -exec rm -f {} \;
 }
 
-function execute_compilation() {
-  local thread_count
-  thread_count=$(nproc)
-
+function execute_compilation {
   log_info "开始执行固件编译逻辑"
-
-  if make -j"${thread_count}" || make -j1 || make -j1 V=s; then
-    log_info "固件编译任务成功完成"
+  if make -j"$(nproc)" || make -j1 || make -j1 V=s; then
+    log_info "固件编译成功"
   else
-    log_error "固件编译过程发生失败"
+    log_error "固件编译失败"
     exit 1
   fi
 }
 
-function export_metadata() {
+function export_metadata {
   local release_name release_tag build_time
 
-  printf -v release_name "%(%Y-%m-%d %H:%M:%S)T" -1
-  printf -v release_tag "%(%Y%m%d%H%M%S)T" -1
-  printf -v build_time "%(%Y年%m月%d日 %H时%M分%S秒)T" -1
+  printf -v release_name '%(%F %T)T' -1
+  printf -v release_tag '%(%Y%m%d%H%M%S)T' -1
+  printf -v build_time '%(%Y年%m月%d日 %H时%M分%S秒)T' -1
 
   {
-    echo "compile_status=success"
-    echo "RELEASE_NAME=${release_name}"
-    echo "RELEASE_TAG=${release_tag}"
-    echo "BUILD_TIME=${build_time}"
-  } >>"${GITHUB_ENV}"
+    echo 'compile_status=success'
+    echo "RELEASE_NAME=$release_name"
+    echo "RELEASE_TAG=$release_tag"
+    echo "BUILD_TIME=$build_time"
+  } >>"$GITHUB_ENV"
 }
 
-function main() {
+function main {
   init_build_env
   setup_source_code
-  cd "${SOURCE_DIR}"
-  manage_feeds
   apply_customization
+  manage_feeds
   download_dependencies
   execute_compilation
   export_metadata
 }
 
 main "$@"
-
-unset -f log error init_build_env setup_source_code manage_feeds apply_customization download_dependencies execute_compilation export_metadata main
-unset SOURCE_DIR WORKSPACE_LINK

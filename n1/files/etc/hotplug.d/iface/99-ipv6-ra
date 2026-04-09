@@ -1,15 +1,10 @@
 #!/bin/sh
 
-IPV6_ACCEPT_RA_PATH='/proc/sys/net/ipv6/conf/br-lan/accept_ra'
+set -euo pipefail
 
-if [ "${ACTION:-}" = 'ifup' ] && [ "${DEVICE:-}" = 'br-lan' ]; then
-  if [ -f "${IPV6_ACCEPT_RA_PATH}" ]; then
-    CURRENT_RA_VAL=$(cat "${IPV6_ACCEPT_RA_PATH}")
+ra_path=/proc/sys/net/ipv6/conf/br-lan/accept_ra
 
-    if [ "${CURRENT_RA_VAL}" -ne 2 ]; then
-      printf '2' >"${IPV6_ACCEPT_RA_PATH}"
-    fi
-  fi
+if [ "${ACTION:-}" = ifup ] && [ "${DEVICE:-}" = br-lan ]; then
+  [ -f "$ra_path" ] || exit 0
+  [ "$(cat "$ra_path")" -ne 2 ] && echo 2 >"$ra_path"
 fi
-
-unset IPV6_ACCEPT_RA_PATH CURRENT_RA_VAL
