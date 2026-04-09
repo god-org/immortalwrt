@@ -37,18 +37,21 @@ function setup_source_code {
   ln -sf /workdir/immortalwrt immortalwrt
 }
 
-function apply_customization {
-  log_info "正在应用自定义配置与 DIY 脚本"
-  [[ -d $DIY_FILES ]] && cp -af "$DIY_FILES" /workdir/immortalwrt/
-  [[ -f $DIY_CONFIG ]] && cp -af "$DIY_CONFIG" /workdir/immortalwrt/
-  [[ -x $DIY_SCRIPT ]] || chmod +x "$DIY_SCRIPT"
-  cd /workdir/immortalwrt && "$GITHUB_WORKSPACE/$DIY_SCRIPT"
-}
-
 function manage_feeds {
   log_info "正在更新与安装 feeds 软件源"
+  cd /workdir/immortalwrt
   ./scripts/feeds update -a
   ./scripts/feeds install -a
+}
+
+function apply_customization {
+  local workspace="$GITHUB_WORKSPACE"
+
+  log_info "正在应用自定义配置与 DIY 脚本"
+  [[ -d $workspace/$DIY_FILES ]] && cp -af "$workspace/$DIY_FILES" /workdir/immortalwrt/
+  [[ -f $workspace/$DIY_CONFIG ]] && cp -af "$workspace/$DIY_CONFIG" /workdir/immortalwrt/
+  [[ -x $workspace/$DIY_SCRIPT ]] || chmod +x "$workspace/$DIY_SCRIPT"
+  "$workspace/$DIY_SCRIPT"
 }
 
 function download_dependencies {
@@ -88,8 +91,8 @@ function export_metadata {
 function main {
   init_build_env
   setup_source_code
-  apply_customization
   manage_feeds
+  apply_customization
   download_dependencies
   execute_compilation
   export_metadata
