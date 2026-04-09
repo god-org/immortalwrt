@@ -55,7 +55,7 @@ function main {
       fi
     done
 
-    if ((${#current_failed_list[@]} == 0)); then
+    if ((!${#current_failed_list[@]})); then
       log_info "所有扩展软件包已成功就位"
       return 0
     fi

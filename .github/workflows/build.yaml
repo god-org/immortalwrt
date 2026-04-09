@@ -41,7 +41,7 @@ jobs:
           DIY_CONFIG: n1/.config
           DIY_SCRIPT: n1/diy.sh
         run: |
-          [[ ! -x $SCRIPT_FILE ]] && chmod +x "$SCRIPT_FILE"
+          [[ -x $SCRIPT_FILE ]] || chmod +x "$SCRIPT_FILE"
           "./$SCRIPT_FILE"
 
       - name: 上传 ImmortalWrt 编译文件

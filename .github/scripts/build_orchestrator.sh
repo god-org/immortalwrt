@@ -41,7 +41,7 @@ function apply_customization {
   log_info "正在应用自定义配置与 DIY 脚本"
   [[ -d $DIY_FILES ]] && cp -af "$DIY_FILES" /workdir/immortalwrt/
   [[ -f $DIY_CONFIG ]] && cp -af "$DIY_CONFIG" /workdir/immortalwrt/
-  [[ ! -x $DIY_SCRIPT ]] && chmod +x "$DIY_SCRIPT"
+  [[ -x $DIY_SCRIPT ]] || chmod +x "$DIY_SCRIPT"
   cd /workdir/immortalwrt && "$GITHUB_WORKSPACE/$DIY_SCRIPT"
 }
 
