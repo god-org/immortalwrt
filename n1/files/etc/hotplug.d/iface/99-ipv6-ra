@@ -2,9 +2,9 @@
 
 set -euo pipefail
 
-ra_path=/proc/sys/net/ipv6/conf/br-lan/accept_ra
+RA_PATH=/proc/sys/net/ipv6/conf/br-lan/accept_ra
 
 if [ "${ACTION:-}" = ifup ] && [ "${DEVICE:-}" = br-lan ]; then
-  [ -f "$ra_path" ] || exit 0
-  [ "$(cat "$ra_path")" -ne 2 ] && echo 2 >"$ra_path"
+  [ -f "$RA_PATH" ] || exit 0
+  [ "$(cat "$RA_PATH")" -ne 2 ] && echo 2 >"$RA_PATH"
 fi
