@@ -45,7 +45,7 @@ function manage_feeds {
 }
 
 function apply_customization {
-  local workspace="$GITHUB_WORKSPACE"
+  local workspace=$GITHUB_WORKSPACE
 
   log_info "正在应用自定义配置与 DIY 脚本"
   [[ -d $workspace/$DIY_FILES ]] && cp -af "$workspace/$DIY_FILES" /workdir/immortalwrt/

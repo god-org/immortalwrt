@@ -38,8 +38,8 @@ function main {
     for url in "${pending_urls[@]}"; do
       [[ -z $url || $url == '#'* ]] && continue
 
-      repo_name="${url##*/}"
-      target_dir="package/$repo_name"
+      repo_name=${url##*/}
+      target_dir=package/$repo_name
 
       if [[ ! -d $target_dir ]]; then
         log_info "正在拉取：$repo_name"
