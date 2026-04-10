@@ -9,6 +9,6 @@ start() {
 	[ -f /root/scripts/cron_runner.sh ] || return 0
 	[ -x /root/scripts/cron_runner.sh ] || chmod +x /root/scripts/cron_runner.sh
 
-	cd "$HOME" || return 1
+	cd /root || return 1
 	/root/scripts/cron_runner.sh reboot &
 }

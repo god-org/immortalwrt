@@ -45,14 +45,14 @@ jobs:
           "./$SCRIPT_FILE"
 
       - name: 上传 ImmortalWrt 编译文件
-        if: env.compile_status == 'success'
+        if: env.COMPILE_STATUS == 'success'
         uses: actions/upload-artifact@v7.0.0
         with:
           name: immortalwrt_${{ env.RELEASE_TAG }}
           path: immortalwrt/bin
 
       - name: 打包 ImmortalWrt 固件
-        if: env.compile_status == 'success'
+        if: env.COMPILE_STATUS == 'success'
         uses: unifreq/openwrt_packit@master
         env:
           OPENWRT_ARMSR: immortalwrt/bin/targets/*/*/*rootfs.tar.gz

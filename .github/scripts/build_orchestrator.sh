@@ -81,7 +81,7 @@ function export_metadata {
   printf -v build_time '%(%Y年%m月%d日 %H时%M分%S秒)T' -1
 
   {
-    echo 'compile_status=success'
+    echo 'COMPILE_STATUS=success'
     echo "RELEASE_NAME=$release_name"
     echo "RELEASE_TAG=$release_tag"
     echo "BUILD_TIME=$build_time"
