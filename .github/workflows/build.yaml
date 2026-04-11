@@ -46,7 +46,7 @@ jobs:
 
       - name: 上传 ImmortalWrt 编译文件
         if: env.COMPILE_STATUS == 'success'
-        uses: actions/upload-artifact@v7.0.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: immortalwrt_${{ env.RELEASE_TAG }}
           path: immortalwrt/bin
