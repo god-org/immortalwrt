@@ -68,7 +68,7 @@ function main {
     else
       log_error "已达最大重试次数，以下仓库拉取失败："
       printf '  - %s\n' "${pending_urls[@]}" >&2
-      exit 1
+      return 1
     fi
   done
 }
