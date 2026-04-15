@@ -2,7 +2,13 @@
 
 set -euo pipefail
 
-[ -f /etc/init.d/cron_reboot ] || exit 0
-[ -x /etc/init.d/cron_reboot ] || chmod +x /etc/init.d/cron_reboot
+main() {
+  local init_path=/etc/init.d/cron_reboot
 
-/etc/init.d/cron_reboot enable
+  [ -f "$init_path" ] || return 0
+  [ -x "$init_path" ] || chmod +x "$init_path"
+
+  "$init_path" enable
+}
+
+main "$@"

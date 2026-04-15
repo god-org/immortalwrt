@@ -3,12 +3,12 @@
 START=99
 
 start() {
-	export HOME=/root
-	export USER=root
+	export HOME=/root USER=root
+	local script_path=$HOME/scripts/cron_runner.sh
 
-	[ -f /root/scripts/cron_runner.sh ] || return 0
-	[ -x /root/scripts/cron_runner.sh ] || chmod +x /root/scripts/cron_runner.sh
+	[ -f "$script_path" ] || return 0
+	[ -x "$script_path" ] || chmod +x "$script_path"
 
-	cd /root || return 1
-	/root/scripts/cron_runner.sh reboot &
+	cd "$HOME" || return 1
+	"$script_path" reboot >>"$HOME/logs/reboot.log" 2>&1 &
 }
