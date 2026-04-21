@@ -20,7 +20,7 @@ jobs:
         shell: bash -euxo pipefail {0}
     steps:
       - name: 获取 Dependabot 元数据
-        uses: dependabot/fetch-metadata@v3.0.0
+        uses: dependabot/fetch-metadata@v3.1.0
 
       - name: 自动合并 Dependabot 的 PR
         env:
