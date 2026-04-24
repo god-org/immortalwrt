@@ -15,13 +15,7 @@ jobs:
   merge:
     runs-on: ubuntu-latest
     if: github.event.pull_request.user.login == 'dependabot[bot]'
-    defaults:
-      run:
-        shell: bash -euxo pipefail {0}
     steps:
-      - name: 获取 Dependabot 元数据
-        uses: dependabot/fetch-metadata@v3.1.0
-
       - name: 自动合并 Dependabot 的 PR
         env:
           PR_URL: ${{ github.event.pull_request.html_url }}

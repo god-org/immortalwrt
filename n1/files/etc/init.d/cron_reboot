@@ -10,5 +10,5 @@ start() {
 	[ -x "$script_path" ] || chmod +x "$script_path"
 
 	cd "$HOME" || return 1
-	"$script_path" reboot >>"$HOME/logs/reboot.log" 2>&1 &
+	$script_path reboot >>"$HOME/logs/reboot.log" 2>&1 &
 }
