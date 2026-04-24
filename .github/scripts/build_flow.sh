@@ -16,7 +16,7 @@ sys_init() {
 
 src_init() {
   lib::log_inf "准备源码：$IM_SRC [ $IM_VER ]"
-  git clone -b "$IM_VER" --depth=1 --single-branch "$IM_SRC" /workdir/immortalwrt
+  git clone -b "$IM_VER" --depth=1 --single-branch "https://github.com/$IM_SRC" /workdir/immortalwrt
   ln -sf /workdir/immortalwrt immortalwrt
 }
 
