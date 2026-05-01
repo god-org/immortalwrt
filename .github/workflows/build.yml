@@ -1,0 +1,108 @@
+name: Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      f_dbug:
+        description: 远程调试
+        type: boolean
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  TZ: Asia/Shanghai
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v6
+
+      - name: 释放磁盘空间
+        uses: BRAINSia/free-disk-space@v2
+        with:
+          docker-images: false
+
+      - name: 开启 tmate 远程调试
+        if: inputs.f_dbug
+        uses: mxschmitt/action-tmate@v3
+
+      - name: 固件编译全流程
+        id: task
+        env:
+          RUN_SH: .github/scripts/build_flow.sh
+          DEBIAN_FRONTEND: noninteractive
+          DEPS_FILE: n1/deps.list
+          IM_SRC: immortalwrt/immortalwrt
+          IM_VER: openwrt-24.10
+          DIY_CONF: n1/.config
+          DIY_DIR: n1/files
+          DIY_SH: n1/diy.sh
+          BASH_LIB: ${{ secrets.BASH_URL }}/.bash_lib
+        run: |
+          [[ -x $RUN_SH ]] || chmod +x "$RUN_SH"
+          "./$RUN_SH"
+
+      - name: 上传 ImmortalWrt 编译文件
+        uses: actions/upload-artifact@v7
+        with:
+          name: immortalwrt_${{ steps.task.outputs.rel_tag }}
+          path: immortalwrt/bin
+
+      - name: 打包 ImmortalWrt 固件
+        uses: unifreq/openwrt_packit@master
+        env:
+          OPENWRT_ARMSR: immortalwrt/bin/targets/*/*/*rootfs.tar.gz
+          KERNEL_VERSION_NAME: 6.12.y
+          PACKAGE_SOC: diy
+          GZIP_IMGS: .xz
+          SCRIPT_DIY_PATH: n1/mk_s905d_n1.sh
+          WHOAMI: ${{ github.repository_owner }}
+          SW_FLOWOFFLOAD: 0
+          SFE_FLOW: 0
+          ENABLE_WIFI_K510: 0
+          DISTRIB_DESCRIPTION: ImmortalWrt
+
+      - name: 上传固件至 GitHub Release
+        uses: softprops/action-gh-release@v3
+        with:
+          files: /opt/openwrt_packit/output/*.img.xz
+          name: ${{ steps.task.outputs.rel_name }}
+          tag_name: ${{ steps.task.outputs.rel_tag }}
+          body: |
+            ### 📦 固件信息
+            - 💻 **机型**：斐讯N1（ Amlogic S905D ）
+            - 🌳 **源码**：[immortalwrt/immortalwrt](https://github.com/immortalwrt/immortalwrt)
+            - 🌿 **分支**：`openwrt-24.10`
+            - 📅 **编译时间**：${{ steps.task.outputs.build_t }}
+            - 🌏 **默认地址**：`192.168.1.2`
+            - 👤 **默认用户**：`root`
+            - 🔒 **默认密码**：`password`
+            ---
+            ⚠️ **注意事项**：首次使用建议全新刷写
+
+      - name: 发送结果至 Telegram
+        uses: appleboy/telegram-action@v1.0.1
+        with:
+          to: ${{ secrets.TELEGRAM_TO }}
+          token: ${{ secrets.TELEGRAM_TOKEN }}
+          format: html
+          disable_web_page_preview: true
+          message: |
+            <b>🚀 ImmortalWrt 构建报告</b>
+
+            ${{ job.status == 'success' && '✅ 成功' || '❌ 失败' }}
+
+            <b>📦 项目信息</b>
+            仓库：<code>${{ github.repository }}</code>
+            分支：<code>${{ github.ref_name }}</code>
+            编号：<code>${{ github.run_number }}</code>
+
+            <b>👤 触发信息</b>
+            账号：<code>${{ github.actor }}</code>
+            触发：<code>${{ github.event_name }}</code>
+            哈希：<code>${{ github.sha }}</code>
+
+            <b>🔗 快速链接</b>
+            <a href="https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}">📋 查看完整日志</a>
+            <a href="https://github.com/${{ github.repository }}/commit/${{ github.sha }}">💻 查看代码变更</a>

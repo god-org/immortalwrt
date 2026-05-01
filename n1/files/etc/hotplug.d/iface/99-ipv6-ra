@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+RA_FILE=/proc/sys/net/ipv6/conf/br-lan/accept_ra
+
+main() {
+  local ipv6_ra
+
+  [ "${ACTION:-}" = ifup ] && [ "${DEVICE:-}" = br-lan ] || return 0
+  [ -f "$RA_FILE" ] && read -rn 1 ipv6_ra <"$RA_FILE" || return 1
+  [ "$ipv6_ra" -ne 2 ] && echo 2 >"$RA_FILE"
+}
+
+main "$@"

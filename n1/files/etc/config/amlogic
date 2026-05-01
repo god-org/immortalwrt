@@ -1,0 +1,18 @@
+
+config amlogic 'config'
+	option enable '1'
+	option amlogic_firmware_repo 'https://github.com/god-org/immortalwrt'
+	option amlogic_firmware_tag 'Latest'
+	option amlogic_firmware_suffix '.img.xz'
+	option amlogic_kernel_path 'https://github.com/breakingbadboy/OpenWrt'
+	option amlogic_kernel_branch '6.12'
+	option amlogic_firmware_config '1'
+	option amlogic_write_bootloader '1'
+	option amlogic_shared_fstype 'btrfs'
+	option amlogic_kernel_tags 'kernel_stable'
+
+config settings 'armcpu'
+	option governor0 'schedutil'
+	option minfreq0 '100000'
+	option maxfreq0 '1512000'
+

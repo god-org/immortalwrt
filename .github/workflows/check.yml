@@ -1,0 +1,40 @@
+name: Check
+
+on:
+  schedule:
+    - cron: 0 16 * * 0
+  workflow_dispatch:
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  TZ: Asia/Shanghai
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: 检出代码
+        uses: actions/checkout@v6
+
+      - name: 获取信息
+        id: get
+        env:
+          IM_SRC: immortalwrt/immortalwrt
+          IM_VER: openwrt-24.10
+        run: |
+          im_sha=$(gh api "/repos/$IM_SRC/commits/$IM_VER" -q '.sha')
+
+          printf '%s\n' "key=$im_sha" >>"$GITHUB_OUTPUT"
+
+      - name: 缓存校验
+        id: cache
+        uses: actions/cache@v5
+        with:
+          path: .cache
+          key: ${{ steps.get.outputs.key }}
+
+      - name: 触发工作流
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          [[ -f .cache ]] || touch .cache
+          gh workflow run Build

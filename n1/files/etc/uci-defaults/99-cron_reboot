@@ -1,0 +1,12 @@
+#!/usr/bin/env sh
+
+main() {
+  local init_path=/etc/init.d/cron_reboot
+
+  [ -f "$init_path" ] || return 0
+  [ -x "$init_path" ] || chmod +x "$init_path"
+
+  $init_path enable
+}
+
+main "$@"
