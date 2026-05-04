@@ -15,8 +15,8 @@ sys_init() {
 }
 
 src_init() {
-  lib::log_inf "准备源码：$IM_SRC [ $IM_VER ]"
-  git clone -b "$IM_VER" --depth=1 --single-branch \
+  lib::log_inf "准备源码：$IM_SRC [ $im_ver ]"
+  git clone -b "$im_ver" --depth=1 --single-branch \
     "https://github.com/$IM_SRC" /workdir/immortalwrt
   ln -sf /workdir/immortalwrt immortalwrt
 }
@@ -58,17 +58,19 @@ pkg_make() {
 }
 
 res_meta() {
-  local rel_name rel_tag build_t
+  local build_t
 
   lib::log_inf '导出元数据'
-  lib::now_t rel_name '%F %T'
-  lib::now_t rel_tag '%Y%m%d%H%M%S'
-  lib::now_t build_t '%Y年%m月%d日 %H时%M分%S秒'
+  lib::now_t build_t
 
-  printf '%s\n' "rel_name=$rel_name" "rel_tag=$rel_tag" "build_t=$build_t" >>"$GITHUB_OUTPUT"
+  printf '%s\n' "rel_name=${im_ver#v}" "rel_tag=$im_ver" "build_t=$build_t" >>"$GITHUB_OUTPUT"
 }
 
 main() {
+  local im_ver
+
+  im_ver=$(gh api "/repos/$IM_SRC/tags" -q 'first(.[].name | select(startswith(env.IM_VER)))')
+
   sys_init
   src_init
   src_feed

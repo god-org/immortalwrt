@@ -20,11 +20,12 @@ jobs:
         id: get
         env:
           IM_SRC: immortalwrt/immortalwrt
-          IM_VER: openwrt-24.10
+          IM_VER: v24.10
         run: |
-          im_sha=$(gh api "/repos/$IM_SRC/commits/$IM_VER" -q '.sha')
+          im_ver=$(gh api "/repos/$IM_SRC/tags" \
+            -q 'first(.[].name | select(startswith(env.IM_VER)))')
 
-          printf '%s\n' "key=$im_sha" >>"$GITHUB_OUTPUT"
+          printf '%s\n' "key=$im_ver" >>"$GITHUB_OUTPUT"
 
       - name: 缓存校验
         id: cache
