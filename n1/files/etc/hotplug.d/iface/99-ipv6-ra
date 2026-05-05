@@ -7,7 +7,7 @@ main() {
 
   [ "${ACTION:-}" = ifup ] && [ "${DEVICE:-}" = br-lan ] || return 0
   [ -f "$RA_FILE" ] && read -rn 1 ipv6_ra <"$RA_FILE" || return 1
-  [ "$ipv6_ra" -ne 2 ] && echo 2 >"$RA_FILE"
+  [ "$ipv6_ra" -eq 2 ] || echo 2 >"$RA_FILE"
 }
 
 main "$@"
