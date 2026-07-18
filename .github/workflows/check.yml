@@ -20,7 +20,7 @@ jobs:
         id: get
         env:
           IM_SRC: immortalwrt/immortalwrt
-          IM_VER: v24.10
+          IM_VER: v25.12
         run: |
           im_ver=$(gh api "/repos/$IM_SRC/tags" \
             -q 'first(.[].name | select(startswith(env.IM_VER)))')

@@ -34,7 +34,7 @@ jobs:
           DEBIAN_FRONTEND: noninteractive
           DEPS_FILE: n1/deps.list
           IM_SRC: immortalwrt/immortalwrt
-          IM_VER: v24.10
+          IM_VER: v25.12
           DIY_CONF: n1/.config
           DIY_DIR: n1/files
           DIY_SH: n1/diy.sh
