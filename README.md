@@ -16,7 +16,7 @@
 
 # 致谢
 
-- [immortalwrt/immortalwrt](https://github.com/immortalwrt/immortalwrt/tree/openwrt-24.10)
+- [immortalwrt/immortalwrt](https://github.com/immortalwrt/immortalwrt/tree/openwrt-25.12)
 - [unifreq/openwrt_packit](https://github.com/unifreq/openwrt_packit)
 - [breakingbadboy/OpenWrt](https://github.com/breakingbadboy/OpenWrt/releases/tag/kernel_stable)
 - [ophub/kernel](https://github.com/ophub/kernel/releases/tag/kernel_flippy)

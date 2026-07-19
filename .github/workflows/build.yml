@@ -18,11 +18,6 @@ jobs:
       - name: 检出代码
         uses: actions/checkout@v7
 
-      - name: 释放磁盘空间
-        uses: BRAINSia/free-disk-space@v2
-        with:
-          docker-images: false
-
       - name: 开启 tmate 远程调试
         if: inputs.f_dbug
         uses: mxschmitt/action-tmate@v3
