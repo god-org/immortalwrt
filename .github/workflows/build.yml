@@ -68,7 +68,7 @@ jobs:
             ### 📦 固件信息
             - 💻 **机型**：斐讯N1（ Amlogic S905D ）
             - 🌳 **源码**：[immortalwrt/immortalwrt](https://github.com/immortalwrt/immortalwrt)
-            - 🌿 **分支**：`openwrt-24.10`
+            - 🌿 **分支**：`openwrt-25.12`
             - 📅 **编译时间**：${{ steps.task.outputs.build_t }}
             - 🌏 **默认地址**：`192.168.1.2`
             - 👤 **默认用户**：`root`
