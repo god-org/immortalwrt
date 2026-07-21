@@ -63,7 +63,6 @@ main() {
   local pkg_list bin_list
 
   pkg_list=(
-    https://github.com/kongfl888/luci-app-adguardhome
     https://github.com/ophub/luci-app-amlogic
   )
 
