@@ -4,3 +4,4 @@ config adguardhome config
 	option config '/etc/adguardhome.yaml'
 	option workdir '/mnt/mmcblk2p4/adguardhome'
 	option pidfile '/run/adguardhome.pid'
+
